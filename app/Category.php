@@ -11,6 +11,7 @@ class Category extends Model  implements TranslatableContract
   use Translatable;
 
   public $translatedAttributes = ['translation'];
+  protected $hidden = ['translation'];
 
   protected static function boot()
   {

@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+// category neka ima default null value
+// Route::get('/{lang}/category/{category?}/tags/{tags?}/with/{dataInResponse?}', 'MealController@test');
+Route::get('/', 'MealController@meals');

@@ -1,124 +1,54 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Database\Eloquent\Builder;
+use App\Http\Resources\Meal as MealResource;
 use Illuminate\Http\Request;
 use App\Meal;
+use \App\Http\Requests\GetMealsRequest;
 
 class MealController extends Controller
 {
-    public function index(Request $request)
+    public function meals(GetMealsRequest $request)
     {
-      $to_return_meals = array();
+        $lang = $request->input('lang');
 
-      $lang = $request->language;
+        // category will be "null" if null is in query and null when category is not in query
+        $category = $request->input('category');
 
-      include 'get_all_tags_and_categories.php';
+        // check if there is only one element, then there is no comma
+        $tags_array = explode(',', $request->input('tags'));
+        (count($tags_array) == 0) ? $tags = $request->input('tags') : $tags = $tags_array;
 
-      if ($request->filter == "none")
-      {
-        $meals = Meal::all();
-        foreach ($meals as $meal)
-        {
-          $title = $meal->title($request->language);
-          $description = $meal->description($request->language);
-          ($request->ingredients == "true") ? $ingredients = $meal->ingredients($request->language) : $ingredients = null;
-          ($request->category == "true") ? $category = $meal->category($request->language) : $category = null;
-          ($request->tags == "true") ? $tags = $meal->tags($request->language) : $tags = null;
-
-          array_push(
-            $to_return_meals,
-            [
-              "title" => $title,
-              "description" => $description,
-              "ingredients" => $ingredients,
-              "category" => $category,
-              "tags" => $tags,
-            ]
-          );
-        }
-      }
-      else if (substr($request->filter, 0, 3) == "tag")
-      {
-        $tag_slug = substr($request->filter, 4);
-        $tagged_meals = array();
-        $to_return_meals = array();
-
-        $all_meals = Meal::all();
-
-        foreach ($all_meals as $meal)
-        {
-          if ($meal->is_tagged($tag_slug))
-          {
-            array_push($tagged_meals, $meal);
+        if ((is_numeric($category) || $category == "null") && strlen($tags[0]) == 0) {
+          // category given and no tags given
+          if ($category == "null") {
+            $meals = Meal::where('category_id', null)->get();
+          } else {
+            $meals = Meal::where('category_id', $category)->get();
           }
-        }
-
-        foreach ($tagged_meals as $meal)
-        {
-          $title = $meal->title($request->language);
-          $description = $meal->description($request->language);
-          ($request->ingredients == "true") ? $ingredients = $meal->ingredients($request->language) : $ingredients = null;
-          ($request->category == "true") ? $category = $meal->category($request->language) : $category = null;
-          ($request->tags == "true") ? $tags = $meal->tags($request->language) : $tags = null;
-
-          array_push(
-            $to_return_meals,
-            [
-              "title" => $title,
-              "description" => $description,
-              "ingredients" => $ingredients,
-              "category" => $category,
-              "tags" => $tags,
-            ]
-          );
-        }
-
-      }
-      else if (substr($request->filter, 0, 8) == "category")
-      {
-        $category_slug = substr($request->filter, 9);
-        $category_meals = array();
-        $to_return_meals = array();
-
-        $all_meals = Meal::all();
-
-        foreach ($all_meals as $meal)
-        {
-          if ($meal->is_in_category($category_slug))
-          {
-            array_push($category_meals, $meal);
+        } elseif ($category == null && strlen($tags[0]) != 0) {
+          // no categroy given, just tags
+          $meals = Meal::whereHas('tags', function(Builder $query) use($tags) {
+            $query->whereIn('tag_id', $tags);
+          }, '=', count($tags))->get();
+        } elseif ((is_numeric($category) || $category == "null") && strlen($tags[0]) != 0) {
+          // category and tags given
+          if ($category == "null") {
+            $meals = Meal::where('category_id', null)->whereHas('tags', function(Builder $query) use($tags) {
+              $query->whereIn('tag_id', $tags);
+            }, '=', count($tags))->get();
+          } else {
+            $meals = Meal::where('category_id', $category)->whereHas('tags', function(Builder $query) use($tags) {
+              $query->whereIn('tag_id', $tags);
+            }, '=', count($tags))->get();
           }
+        } else {
+          // no category and no tags given
+          $meals = Meal::all();
         }
 
-        foreach ($category_meals as $meal)
-        {
-          $title = $meal->title($request->language);
-          $description = $meal->description($request->language);
-          ($request->ingredients == "true") ? $ingredients = $meal->ingredients($request->language) : $ingredients = null;
-          ($request->category == "true") ? $category = $meal->category($request->language) : $category = null;
-          ($request->tags == "true") ? $tags = $meal->tags($request->language) : $tags = null;
-
-          array_push(
-            $to_return_meals,
-            [
-              "title" => $title,
-              "description" => $description,
-              "ingredients" => $ingredients,
-              "category" => $category,
-              "tags" => $tags,
-            ]
-          );
-        }
-
-      }
-
-      return view('welcome', [
-        "meals" => $to_return_meals,
-        "lang" => $request->language,
-        'tags' => $translated_tags,
-        'categories' => $translated_categories
-      ]);
-
+        return MealResource::collection($meals);
     }
+
 }

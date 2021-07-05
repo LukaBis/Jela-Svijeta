@@ -7,87 +7,37 @@ use Illuminate\Support\Facades\DB;
 
 class Meal extends Model
 {
-    public function title($lang)
+
+    public function title()
     {
-      $title = $this->belongsTo('App\Title')->get()[0]->translate($lang);
-      return $title;
+      return $this->belongsTo('App\Title');
     }
 
-    public function description($lang)
+
+    public function description()
     {
-      $title = $this->belongsTo('App\Description')->get()[0]->translate($lang);
-      return $title;
+      return $this->belongsTo('App\Description');
     }
 
-    public function ingredients($lang)
+    public function ingredients()
     {
-      $ingredients = $this->hasMany('App\Ingredient')->get();
-      $ingredients_translated = array();
-
-      foreach ($ingredients as $ingredient)
-      {
-        array_push($ingredients_translated, $ingredient->translate($lang));
-      }
-
-      return $ingredients_translated;
+      return $this->hasMany('App\Ingredient');
     }
 
-    public function category($lang)
+    public function category()
     {
 
       if ($this->category_id != null)
       {
-        $category = DB::table("categories")->where("id", "=", $this->category_id)->get()[0];
-
-        $category_translation = DB::table("category_translations")->where([
-          ["category_id", "=", $category->id],
-          ["locale", "=", $lang]
-        ])->get();
-
-        if (count($category_translation)) {
-          return $category_translation[0]->translation;
-        }
-        else {
-          return null;
-        }
+        return $this->belongsTo("App\Category");
       }
 
       return null;
     }
 
-    public function tags($lang)
+    public function tags()
     {
-      $tags = $this->belongsToMany('App\Tag')->get();
-      $tags_translated = array();
-
-      foreach ($tags as $tag)
-      {
-        array_push($tags_translated, $tag->translate($lang));
-      }
-
-      return $tags_translated;
+      return $this->belongsToMany(Tag::class);
     }
 
-    public function is_tagged($tag_slug)
-    {
-      $tags = $this->belongsToMany('App\Tag')->get();
-
-      foreach ($tags as $tag)
-      {
-        if ($tag->slug == $tag_slug)
-        {
-          return 1;
-        }
-      }
-
-      return 0;
-    }
-
-    public function is_in_category($category_slug)
-    {
-      // usporedit category_id od meal i id od category
-      $category = $category = DB::table("categories")->where("slug", "=", $category_slug)->get()[0];
-
-      return $this->category_id == $category->id;
-    }
 }

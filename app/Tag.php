@@ -29,4 +29,5 @@ class Tag extends Model  implements TranslatableContract
         $slug = 'tag-' . $id;
         return $slug;
     }
+
 }

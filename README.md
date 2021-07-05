@@ -10,11 +10,11 @@ Then run the app.
 # Sending the request
 Here is an example of a GET request to this api:
 /api?lang=en&category=1&tags=1,4&with=category,ingredients,tags
-
+<br>
 This means that you want to get meals in english language that have category_id 1 and two tags with ids 1 and 4. "With" parameter specifies which data you want in your response along with title,description and id.
-
+<br>
 Parameters:
-lang - language en/hrv/ita/deu - required
-category - category id - 1/2/3 - optional
-tags - tags ids - 1 - 8 - optional
-with - category/tags/ingredients - optional
+lang - language en/hrv/ita/deu - required<br>
+category - category id - 1/2/3 - optional<br>
+tags - tags ids - 1 - 8 - optional<br>
+with - category/tags/ingredients - optional<br>

@@ -19,8 +19,8 @@ lang - language en/hrv/ita/deu - required<br>
 category - category id - 1/2/3 - optional<br>
 tags - tags ids - 1 - 8 - optional<br>
 with - category/tags/ingredients - optional<br>
-per_page - items per page
-page - number of page
+per_page - items per page<br>
+page - number of page<br>
 diff_time - status of the meal will be either created, modified or deleted if diff_time is less than
 latest timestamp. When this parameter is not defined in the request, then status of the meal is created.
 </p>

@@ -27,10 +27,11 @@ class Meal extends JsonResource
           'id' => $this->id,
           'title' => $this->title()->get()[0]->translate($request->lang)->translation,
           'description' => $this->description()->get()[0]->translate($request->lang)->translation,
+          'status' => $this->status($request->diff_time),
           'category' => $this->when($check->category, ($this->category_id != null) ?
           CategoryResource::collection($this->category()->get()) : null),
           'tags' => $this->when($check->tags, TagResource::collection($this->tags()->get())),
-          'ingredients' => $this->when($check->ingredients, IngredientResource::collection($this->ingredients()->get()))
+          'ingredients' => $this->when($check->ingredients, IngredientResource::collection($this->ingredients()->get())),
       ];
     }
 }

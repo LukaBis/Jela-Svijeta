@@ -4,49 +4,58 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Language;
+use App\Category;
+use App\Tag;
 
 class GetMealsRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    // public function authorize()
-    // {
-    //     return false;
-    // }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
+    public function attributes()
+    {
+      return [
+          'lang' => 'language',
+      ];
+    }
 
-    //  protected function prepareForValidation()
-    // {
-    //     if (isset($this->with)) {
-    //       $this->with = explode(',', $this->with);
-    //     }
-    // }
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'tags' => explode(',',$this->tags),
+            'with' => explode(',',$this->with),
+        ]);
+
+        // if tags are not given i request, set to false
+        (!$this->tags[0]) ? $this->merge(['tags' => false ]) : '';
+    }
 
     public function rules()
     {
         return [
             'lang' => [
               'required',
-              Rule::in(['en', 'hrv', 'ita', 'deu']),
+              Rule::in(ConvertToArrayForValidation::getArray(
+                Language::select('iso')->get()
+              )),
             ],
             'category' => [
-              'max:4',
-              Rule::in([1, 2, 3, "null"])
+              Rule::in(ConvertToArrayForValidation::getArray(
+                Category::select('id')->get(), true
+              ))
             ],
-            'tags' => [
-              'max:8'
+            'tags.*' => [
+              Rule::in(ConvertToArrayForValidation::getArray(
+                Tag::select('id')->get()
+              )),
+              'distinct'
             ],
-            'with' => [
-              'max:25'
-            ]
+            'with.*' => [
+              Rule::in(['tags', 'category', 'ingredients']),
+              'distinct'
+            ],
+            'diff_time' => ['gt:0'],
+            'per_page' => 'gt:0|numeric',
+            'page' => 'numeric'
         ];
     }
 }

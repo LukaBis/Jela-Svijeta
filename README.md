@@ -23,4 +23,5 @@ per_page - items per page<br>
 page - number of page<br>
 diff_time - status of the meal will be either created, modified or deleted if diff_time is less than
 latest timestamp. When this parameter is not defined in the request, then status of the meal is created.
+Value of this parameter is UNIX timestamp.
 </p>

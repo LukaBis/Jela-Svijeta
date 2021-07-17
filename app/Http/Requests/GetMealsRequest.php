@@ -53,7 +53,8 @@ class GetMealsRequest extends FormRequest
               Rule::in(['tags', 'category', 'ingredients']),
               'distinct'
             ],
-            'diff_time' => ['gt:0'],
+            //253402300800 is max unix timestamp for 64-bit OS system
+            'diff_time' => ['gt:0', 'numeric', 'lt:253402300800'],
             'per_page' => 'gt:0|numeric',
             'page' => 'numeric'
         ];
